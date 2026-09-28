@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:7.0
+    container_name: streamcall-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: streamcall
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # StreamCall Backend & Web Application Service
+  streamcall:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: streamcall-app
+    restart: always
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - SERVER_PORT=5000
+      - HOST=0.0.0.0
+      - SERVE_CLIENT=true
+      - MONGODB_URI=mongodb://mongodb:27017/streamcall
+      - JWT_SECRET=change-this-to-a-secure-random-secret-in-production
+      # - ALLOWED_ORIGINS=https://your-domain.com
+      # - VITE_TURN_SERVER_URL=turn:turn.yourdomain.com:3478
+      # - VITE_TURN_USERNAME=your_turn_user
+      # - VITE_TURN_CREDENTIAL=your_turn_pass
+    ports:
+      - "5000:5000"
+    volumes:
+      - recordings-data:/app/server/recordings
+
+volumes:
+  mongo-data:
+    driver: local
+  recordings-data:
+    driver: local

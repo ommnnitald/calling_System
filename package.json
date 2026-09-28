@@ -1,0 +1,32 @@
+{
+  "name": "calling-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -p \"[{name}]\" -n \"SERVER,CLIENT\" -c \"blue,magenta\" \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "dev:https": "concurrently -k -p \"[{name}]\" -n \"SERVER,CLIENT\" -c \"blue,magenta\" \"npm run dev --workspace=server\" \"npm run dev:https --workspace=client\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "typecheck": "npm run typecheck --workspace=server && npm run typecheck --workspace=client",
+    "test:signaling": "node test-signaling.mjs",
+    "test:webrtc": "node test-webrtc-e2e.mjs",
+    "test:lan": "node test-lan.mjs",
+    "test:auth": "node test-auth-dashboard.mjs",
+    "android:sync": "npx cap sync android",
+    "android:build": "npm run build --workspace=client && npx cap sync android",
+    "android:apk": "npm run android:build && powershell -Command \"$env:JAVA_HOME='C:\\Program Files\\Microsoft\\jdk-17.0.20.101-hotspot'; cd android; .\\gradlew.bat assembleDebug; Copy-Item app\\build\\outputs\\apk\\debug\\app-debug.apk ..\\StreamCall.apk -Force\"",
+    "android:open": "npx cap open android"
+  },
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "devDependencies": {
+    "@capacitor/android": "^6.2.2",
+    "@capacitor/cli": "^6.2.2",
+    "@capacitor/core": "^6.2.2",
+    "concurrently": "^9.1.2",
+    "playwright": "^1.63.0"
+  }
+}

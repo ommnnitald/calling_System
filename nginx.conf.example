@@ -1,0 +1,42 @@
+# Nginx Reverse Proxy Configuration for StreamCall with Let's Encrypt SSL
+# Place in /etc/nginx/sites-available/streamcall and link to /etc/nginx/sites-enabled/
+
+server {
+    listen 80;
+    server_name streamcall.yourdomain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name streamcall.yourdomain.com;
+
+    # SSL Certificates (Managed by certbot --nginx)
+    ssl_certificate /etc/letsencrypt/live/streamcall.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/streamcall.yourdomain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Client body size for file uploads / recordings
+    client_max_body_size 50M;
+
+    # WebSocket and API Proxy to StreamCall container / local port 5000
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        
+        # WebSocket upgrade headers
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        # Real client IP forwarding
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket timeouts
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+}
