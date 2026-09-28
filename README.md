@@ -21,10 +21,14 @@ StreamCall provides a seamless peer-to-peer calling experience directly inside a
 ### Architecture Diagram
 
 ```mermaid
-graph TD
-    ClientA["Client A (Browser)"] <-->|Signaling Events (WebSocket)| Server["Signaling Server (Node/Express/Socket.IO)"]
-    ClientB["Client B (Browser)"] <-->|Signaling Events (WebSocket)| Server
-    ClientA <===>|WebRTC Peer-to-Peer (SRTP Media + ICE)| ClientB
+flowchart TD
+    ClientA["Client A (Browser)"]
+    ClientB["Client B (Browser)"]
+    Server["Signaling Server (Node / Express / Socket.IO)"]
+
+    ClientA <-->|"Signaling Events (WebSocket)"| Server
+    ClientB <-->|"Signaling Events (WebSocket)"| Server
+    ClientA <-->|"WebRTC Peer-to-Peer (SRTP Media + ICE)"| ClientB
 ```
 
 ### WebRTC Signaling Sequence
